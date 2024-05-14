@@ -1,24 +1,29 @@
-CC := cc
-CFLAGS := -Wall -Wextra -Werror
-NAME := philo
-SRC_DIR := src
-BIN_DIR := bin
+CC=cc
+CFLAGS= -Wall -Wextra -Werror -I.
+NAME=philo
+SRCDIR=src
+BINDIR=bin
+OBJ=$(patsubst $(SRCDIR)/%.c, $(BINDIR)/%.o, $(wildcard $(SRCDIR)/*.c))
 
-SRC := $(wildcard $(SRC_DIR)/*.c)
-OBJ := $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRC))
+vpath %.c src
 
 all : $(NAME)
 
-$(NAME) : $(OBJ)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
+$(NAME) : $(OBJ) | $(BINDIR)
+	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
-$(BIN_DIR)/%.o : $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -o $@ $<
-	
+$(BINDIR) :
+	mkdir -p $@
+
+$(BINDIR)/%.o : %.c | $(BINDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 clean :
-	rm -rf $(OBJ)
+	rm -rf $(BINDIR)
 fclean : clean
 	rm -rf $(NAME)
+
 re : fclean all
 
-.PHONY : all clean fclean re
+.PHONY: all clean fclean re
+.SECONDARY:
