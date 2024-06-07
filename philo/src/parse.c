@@ -20,20 +20,29 @@ static int	ft_atoi(const char *str)
 	return (res);
 }
 
-t_params	parse(int ac, char **av)
+void	parse(int ac, char **av)
 {
-	t_params	params;
+	t_args	args;
 
 	if (!(5 == ac || 6 == ac))
 		exit(error());
-	params.philo_num = ft_atoi(av[1]);
-	params.ttd = ft_atoi(av[2]);
-	params.tte = ft_atoi(av[3]);
-	params.tts = ft_atoi(av[4]);
+	args.philo_num = ft_atoi(av[1]);
+	args.ttd = ft_atoi(av[2]);
+	args.tte = ft_atoi(av[3]);
+	args.tts = ft_atoi(av[4]);
 	if (6 == ac)
-		params.min_eats = ft_atoi(av[5]);
+		args.min_eats = ft_atoi(av[5]);
 	else
-		params.min_eats = -1;
-	return (params);
+		args.min_eats = -1;
+	get_args(0, &args);
 }
 
+t_args	get_args(int get, t_args *args)
+{
+	static t_args g_args;
+
+	if (get)
+		return (g_args);
+	g_args = *args;
+	return (g_args);
+}
