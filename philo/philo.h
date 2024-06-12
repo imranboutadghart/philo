@@ -25,6 +25,14 @@ typedef struct s_args
 	int	min_eats;
 }	t_args;
 
+typedef struct s_philo
+{
+	pthread_mutex_t	m_fork;
+	pthread_mutex_t	m_philo;
+	struct timeval	last_meal;
+} t_philo;
+
+
 t_args			get_args(int get, t_args *args);
 void			parse(int ac, char **av);
 int				error(void);
@@ -34,7 +42,10 @@ void			eating(long i);
 void			sleeping(long i);
 void			thinking(long i);
 
-pthread_mutex_t	*get_fork(long i);
-void			kill_forks(void);
+struct timeval	get_last_meal(long i);
+void			set_last_meal(long i, struct timeval tv);
+void			kill_philos(void);
+t_philo			*get_philos();
+
 
 #endif

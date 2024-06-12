@@ -2,17 +2,24 @@
 
 void	eating(long i)
 {
-	t_args	args;
+	t_args			args;
 	struct timeval	tv;
+	t_philo			*philos;
 
 	args = get_args(1, 0);
+	philos = get_philos();
+	pthread_mutex_lock(&philos[i].m_fork);
+	printf(YEL"%ld %ld has taken a fork"WHT"\n", tv.tv_usec, i + 1);
+	pthread_mutex_lock(&philos[(i + 1) % args.philo_num].m_fork);
+	printf(YEL"%ld %ld has taken a fork"WHT"\n", tv.tv_usec, i + 1);
+	pthread_mutex_lock(&philos[i].m_philo);
 	gettimeofday(&tv, NULL);
-	pthread_mutex_lock(get_fork(i));
-	pthread_mutex_lock(get_fork(i + 1));
-	printf(RED"%ld %ld is eating"WHT"\n", tv.tv_usec, i + 1);
+	printf(MAG"%ld %ld is eating"WHT"\n", tv.tv_usec, i + 1);
+	set_last_meal(i, tv);
 	usleep(args.tte);
-	pthread_mutex_unlock(get_fork(i));
-	pthread_mutex_unlock(get_fork(i + 1));
+	pthread_mutex_unlock(&philos[i].m_fork);
+	pthread_mutex_unlock(&philos[(i + 1) % args.philo_num].m_fork);
+	pthread_mutex_unlock(&philos[i].m_philo);
 }
 void	sleeping(long i)
 {
@@ -32,9 +39,5 @@ void	thinking(long i)
 	args = get_args(1, 0);
 	gettimeofday(&tv, NULL);
 	printf(BLU"%ld %ld is thinking"WHT"\n", tv.tv_usec, i + 1);
-	usleep(args.ttd);
 }
-
-// timestamp_in_ms X has taken a fork
-// timestamp_in_ms X died
 
