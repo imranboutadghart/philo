@@ -34,10 +34,10 @@ void	parse(int ac, char **av)
 		args.min_eats = ft_atoi(av[5]);
 	else
 		args.min_eats = -1;
-	get_args(0, &args);
+	set_args(0, &args);
 }
 
-t_args	get_args(int get, t_args *args)
+static t_args	set_args(int get, t_args *args)
 {
 	static t_args g_args;
 
@@ -45,4 +45,9 @@ t_args	get_args(int get, t_args *args)
 		return (g_args);
 	g_args = *args;
 	return (g_args);
+}
+
+t_args	get_args()
+{
+	return (set_args(1, NULL));
 }

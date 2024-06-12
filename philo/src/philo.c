@@ -2,32 +2,47 @@
 
 void	*monitoring(void *data)
 {
-	t_args			args;
-	t_philo			*philos;
-	struct timeval	tv;
-	int				looping;
-	int				i;
+	t_args	args;
+	t_philo	*philos;
+	int		looping;
+	long	i;
+	suseconds_t	time;
 
 	(void) data;
 	looping = 1;
-	args = get_args(1, 0);
+	args = get_args();
 	philos = get_philos();
 	while (looping)
 	{
-		i = 0;
-		while (i < args.philo_num)
+		i = -1;
+		while (++i < args.philo_num)
 		{
 			pthread_mutex_lock(&philos[i].m_philo);
-			get_last_meal(i);
+			time = get_u_timeofday();
+			if ((time - get_last_meal(i)) < args.ttd)
+			{
+				printf(MAG"%ld %ld died"WHT"\n", time, i + 1);
+				exit(0);
+			}
+			pthread_mutex_unlock(&philos[i].m_philo);
 		}
 	}
+	return NULL;
 }
 
 void	*do_actions(void *i)
 {
-	eating((long)i);
-	sleeping((long)i);
-	thinking((long)i);
+	t_args	args;
+
+	args = get_args();
+	if ((long)i % 2)
+		usleep(args.tte / 2);
+	while (1)
+	{
+		eating((long)i);
+		sleeping((long)i);
+		thinking((long)i);
+	}
 	return (NULL);
 }
 
@@ -38,7 +53,7 @@ void	start_simulation()
 	pthread_t	monitor;
 	int			i;
 
-	args = get_args(1, 0);
+	args = get_args();
 	philosophers = malloc(args.philo_num * sizeof(pthread_t));
 	i = 0;
 	while (i < args.philo_num)
@@ -48,6 +63,7 @@ void	start_simulation()
 		i++;
 	}
 	pthread_create(&monitor, NULL, monitoring, NULL);
+	pthread_join(monitor, NULL);
 	i = 0;
 	while (i < args.philo_num)
 	{

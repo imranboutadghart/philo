@@ -29,11 +29,12 @@ typedef struct s_philo
 {
 	pthread_mutex_t	m_fork;
 	pthread_mutex_t	m_philo;
-	struct timeval	last_meal;
+	suseconds_t		last_meal;
+	int				meals;
 } t_philo;
 
 
-t_args			get_args(int get, t_args *args);
+t_args			get_args(void);
 void			parse(int ac, char **av);
 int				error(void);
 
@@ -42,7 +43,9 @@ void			eating(long i);
 void			sleeping(long i);
 void			thinking(long i);
 
-struct timeval	get_last_meal(long i);
+suseconds_t get_u_timeofday();
+
+suseconds_t	get_last_meal(long i);
 void			set_last_meal(long i, struct timeval tv);
 void			kill_philos(void);
 t_philo			*get_philos();

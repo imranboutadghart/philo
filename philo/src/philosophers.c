@@ -8,7 +8,7 @@ t_philo *get_philos()
 
 	if (!philos)
 	{
-		args = get_args(1, NULL);
+		args = get_args();
 		philos = malloc(args.philo_num * sizeof(t_philo));
 		j = 0;
 		while (j < args.philo_num)
@@ -28,7 +28,7 @@ void	kill_philos(void)
 	int 	i;
 
 	i = 0;
-	args = get_args(1, NULL);
+	args = get_args();
 	philos = get_philos();
 	while (i < args.philo_num)
     {
@@ -38,16 +38,15 @@ void	kill_philos(void)
 	free(philos);
 }
 
-void set_last_meal(long i, struct timeval tv)
+void set_last_meal(long i, suseconds_t time)
 {
     t_philo *philos;
-	t_args	args;
 
     philos = get_philos();
-    philos[i].last_meal = tv;
+    philos[i].last_meal = time;
 }
 
-struct timeval get_last_meal(long i)
+suseconds_t get_last_meal(long i)
 {
     t_philo *philos;
 
