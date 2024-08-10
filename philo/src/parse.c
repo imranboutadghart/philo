@@ -1,6 +1,6 @@
 #include "philo.h"
 
-static int	ft_atoi(const char *str)
+static int	ft_atoi(const char *str, int *err)
 {
 	size_t	i;
 	long	res;
@@ -8,46 +8,43 @@ static int	ft_atoi(const char *str)
 	i = 0;
 	res = 0;
 	if (!str[i])
-		exit(error());
+		*err = error(ERR_EMPTY_ARG, NULL);
 	while (str[i] >= '0' && str[i] <= '9')
 	{
 		res = res * 10 + str[i++] - '0';
 		if ((res > 2147483647))
-			exit(error());
+			*err = error(ERR_TOO_BIG_ARG, NULL);
 	}
 	if (str[i])
-		exit(error());
+		*err = error(ERR_INVALID_INPUT, NULL);
 	return (res);
 }
 
-void	parse(int ac, char **av)
+t_args	parse(int ac, char **av)
 {
 	t_args	args;
 
+	args.err = 0;
 	if (!(5 == ac || 6 == ac))
-		exit(error());
-	args.philo_num = ft_atoi(av[1]);
-	args.ttd = ft_atoi(av[2]);
-	args.tte = ft_atoi(av[3]);
-	args.tts = ft_atoi(av[4]);
+	{
+		args.err = error(ERR_WRONG_NUM_ARG, NULL);
+		return (args);
+	}
+	args.philo_num = ft_atoi(av[1], &args.err);
+	if (args.err)
+		return (args);
+	args.ttd = ft_atoi(av[2], &args.err);
+	if (args.err)
+		return (args);
+	args.tte = ft_atoi(av[3], &args.err);
+	if (args.err)
+		return (args);
+	args.tts = ft_atoi(av[4], &args.err);
 	if (6 == ac)
-		args.min_eats = ft_atoi(av[5]);
+		args.min_eats = ft_atoi(av[5], &args.err);
 	else
 		args.min_eats = -1;
-	set_args(0, &args);
-}
-
-static t_args	set_args(int get, t_args *args)
-{
-	static t_args g_args;
-
-	if (get)
-		return (g_args);
-	g_args = *args;
-	return (g_args);
-}
-
-t_args	get_args()
-{
-	return (set_args(1, NULL));
+	if (args.err)
+		return (args);
+	return (args);
 }

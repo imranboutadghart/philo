@@ -12,32 +12,37 @@
 
 #include "philo.h"
 
-int	error(void)
+int	error(char *str, t_data *data)
 {
+	if (data)
+		pthread_mutex_lock(data->m_print);
+	if (str)
+	{
+		printf("%s\n", str);
+		return (1);
+	}
 	write(2, "Error\n", 6);
 	return (1);
 }
 
-size_t	ft_strlen(const char *s)
+void	print_action(t_data *data, char *str, int i)
 {
-	size_t	i;
+	t_timeval	tv;
 
-	i = 0;
-	while (s[i])
-		i++;
-	return (i);
+	tv = get_timeval(data);
+	if (data->err)
+		return ;
+	pthread_mutex_lock(data->m_print);
+	if (!(data->end || data->err) && PRINT)
+	{
+		print_time(tv);
+		printf(str, i + 1);
+	}	
+	pthread_mutex_unlock(data->m_print);
 }
 
-int	in_str(char c, char *str)
+void	unlock_if_locked(pthread_mutex_t *mutex)
 {
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == c)
-			return (1);
-		i++;
-	}
-	return (0);
+	pthread_mutex_trylock(mutex);
+	pthread_mutex_unlock(mutex);
 }

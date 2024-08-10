@@ -1,81 +1,128 @@
 #include "philo.h"
 
-void	*monitoring(void *data)
+void	*monitoring(void *dt)
 {
-	t_args	args;
-	t_philo	*philos;
-	int		looping;
-	long	i;
-	suseconds_t	time;
+	int			looping;
+	int			i;
+	t_timeval	tv;
+	t_data		*data;
 
-	(void) data;
+	data = (t_data *)dt;
 	looping = 1;
-	args = get_args();
-	philos = get_philos();
 	while (looping)
 	{
 		i = -1;
-		while (++i < args.philo_num)
+		looping = 0;
+		while (++i < data->args.philo_num)
 		{
-			pthread_mutex_lock(&philos[i].m_philo);
-			time = get_u_timeofday();
-			if ((time - get_last_meal(i)) < args.ttd)
+			pthread_mutex_lock(data->philos[i].m_philo);
+			tv = get_timeval(data);
+			if (data->err)
+				return (pthread_mutex_unlock(data->philos[i].m_philo), NULL);
+			if (time_difference(tv, data->philos[i].last_meal) > data->args.ttd)
 			{
-				printf(MAG"%ld %ld died"WHT"\n", time, i + 1);
-				exit(0);
+				pthread_mutex_lock(data->m_print);
+				print_time(tv);
+				printf(MAG"%d died"WHT"\n", i + 1);
+				printf(RED"diff = %ld\n", time_difference(tv, data->philos[i].last_meal));
+				data->end = 1;
+				pthread_mutex_unlock(data->philos[i].m_philo);
+				return (NULL);
 			}
-			pthread_mutex_unlock(&philos[i].m_philo);
+			if (data->philos[i].meals < data->args.min_eats)
+				looping = 1;
+			pthread_mutex_unlock(data->philos[i].m_philo);
 		}
 	}
-	return NULL;
+	data->end = 1;
+	return (NULL);
 }
 
-void	*do_actions(void *i)
+void	*routine(void *thread_args)
 {
-	t_args	args;
+	int		i;
+	t_data	*data;
 
-	args = get_args();
-	if ((long)i % 2)
-		usleep(args.tte / 2);
+	i = ((t_thread_arg *)thread_args)->i;
+	data = ((t_thread_arg *)thread_args)->data;
+	if (i % 2)
+		usleep(data->args.tte * 1000);
 	while (1)
 	{
-		eating((long)i);
-		sleeping((long)i);
-		thinking((long)i);
+		eating(i, data);
+		sleeping(i, data);
+		thinking(i, data);
+		if (data->err || data->end)
+			return (NULL);
 	}
 	return (NULL);
 }
 
-void	start_simulation()
+void	start_simulation(t_data *data)
 {
-	t_args		args;
-	pthread_t	*philosophers;
-	pthread_t	monitor;
-	int			i;
+	pthread_t		*philosophers;
+	pthread_t		monitor;
+	t_thread_arg	*th_args;
+	int				i;
 
-	args = get_args();
-	philosophers = malloc(args.philo_num * sizeof(pthread_t));
-	i = 0;
-	while (i < args.philo_num)
+	philosophers = malloc(data->args.philo_num * sizeof(pthread_t));
+	if (!philosophers)
 	{
-		if (pthread_create(philosophers + i, NULL, do_actions, (void*)(long)i))
-			/*handle error*/;
+		data->err= error(ERR_MALLOC_THREADS, NULL);
+		return ;
+	}
+	th_args = create_thread_args(data);
+	if (data->err)
+	{
+		free(philosophers);
+		return ;
+	}
+	i = 0;
+	while (i < data->args.philo_num)
+	{
+		if (pthread_create(philosophers + i, NULL, routine, (void*)(th_args + i)))
+			{
+				data->err = error(ERR_CREAT_THREAD, data);
+				break ;
+			}
 		i++;
 	}
-	pthread_create(&monitor, NULL, monitoring, NULL);
-	pthread_join(monitor, NULL);
-	i = 0;
-	while (i < args.philo_num)
+	if (!data->err)
+	{
+		pthread_create(&monitor, NULL, monitoring, (void *)data);
+		pthread_join(monitor, NULL);
+		i = data->args.philo_num - 1;
+		// if (data->err || data->end)
+		// {
+		// 	detach_philos(data, philosophers);
+		// 	unlock_if_locked(data->m_print);
+		// 	i = -1;
+		// }
+	}
+	while (i >= 0)
 	{
 		if (pthread_join(philosophers[i], NULL))
-			/*handle error*/;
-		i++;
+			data->err = error(ERR_JOIN_THREAD, data);
+		i--;
 	}
+	free(th_args);
 	free(philosophers);
 }
 
 int main(int ac, char **av)
 {
-	parse(ac, av);
-	start_simulation();
+	t_args	args;
+	t_data	data;
+
+	args.err = 0;
+	args = parse(ac, av);
+	if (args.err)
+		return (1);
+	data.err = 0;
+	data = init_data(args);
+	if (data.err)
+		return (1);
+	start_simulation(&data);
+	destroy_data(&data);
+	return (data.err);
 }

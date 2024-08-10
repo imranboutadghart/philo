@@ -1,62 +1,50 @@
 #include "philo.h"
 
-static void take_fork(long i)
+static void take_forks(int i, t_data *data)
 {
-	t_args			args;
-	t_philo			*philos;
-
-	philos = get_philos();
-	args = get_args();
-	pthread_mutex_lock(&philos[i % args.philo_num].m_fork);
-	printf(YEL"%ld %ld has taken a fork"WHT"\n", get_u_timeofday, i + 1);
+	pthread_mutex_lock(data->philos[i % data->args.philo_num].m_fork);
+	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
+	pthread_mutex_lock(data->philos[i + 1 % data->args.philo_num].m_fork);
+	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
 }
 
-void	put_fork(long i)
+static void take_forks_reversed(int i, t_data *data)
 {
-	t_args	args;
-	t_philo	*philos;
-
-	philos = get_philos();
-	args = get_args();
-	pthread_mutex_unlock(&philos[i % args.philo_num].m_fork);
+	pthread_mutex_lock(data->philos[i + 1 % data->args.philo_num].m_fork);
+	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
+	pthread_mutex_lock(data->philos[i % data->args.philo_num].m_fork);
+	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
 }
 
-void	eating(long i)
+void	put_forks(int i, t_data *data)
 {
-	t_args		args;
-	suseconds_t	time;
-	t_philo		*philos;
-
-	args = get_args();
-	philos = get_philos();
-	take_fork(i);
-	take_fork(i + 1);
-	time = get_u_timeofday;
-	printf(MAG"%ld %ld is eating"WHT"\n", time, i + 1);
-	pthread_mutex_lock(&philos[i].m_philo);
-	set_last_meal(i, time);
-	pthread_mutex_unlock(&philos[i].m_philo);
-	usleep(args.tte);
-	put_fork(i);
-	put_fork(i + 1);
+	pthread_mutex_unlock(data->philos[i].m_fork);
+	pthread_mutex_unlock(data->philos[(i + 1) %	 data->args.philo_num].m_fork);
 }
-void	sleeping(long i)
-{
-	t_args	args;
-	struct timeval	tv;
 
-	args = get_args();
-	gettimeofday(&tv, NULL);
-	printf(GRN"%ld %ld is sleeping"WHT"\n", tv.tv_usec, i + 1);
-	usleep(args.tts);
+void	eating(int i, t_data *data)
+{
+	t_timeval	tv;
+
+	if (i % 2)
+		take_forks(i, data);
+	else
+		take_forks_reversed(i, data);
+	pthread_mutex_lock(data->philos[i].m_philo);
+	tv = get_timeval(data);
+	print_action(data, MAG"%ld is eating"WHT"\n", i);
+	data->philos[i].last_meal = tv;
+	pthread_mutex_unlock(data->philos[i].m_philo);
+	usleep(data->args.tte * 1000);
+	put_forks(i, data);
 }
-void	thinking(long i)
+void	sleeping(int i, t_data *data)
 {
-	t_args	args;
-	struct timeval	tv;
-
-	args = get_args();
-	gettimeofday(&tv, NULL);
-	printf(BLU"%ld %ld is thinking"WHT"\n", tv.tv_usec, i + 1);
+	print_action(data, GRN"%ld is sleeping"WHT"\n", i);
+	usleep(data->args.tts * 1000);
+}
+void	thinking(int i, t_data *data)
+{
+	print_action(data, BLU"%ld is thinking"WHT"\n", i);
 }
 

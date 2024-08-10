@@ -16,39 +16,80 @@
 # define CYN "\e[0;36m"
 # define WHT "\e[0;37m"
 
+# define PRINT 0
+
+# define ERR_EMPTY_ARG        "error empty_arg"
+# define ERR_TOO_BIG_ARG      "error too_big_arg"
+# define ERR_INVALID_INPUT    "error invalid_input"
+# define ERR_WRONG_NUM_ARG    "error wrong_num_arg"
+# define ERR_MALLOC_THREADS   "error malloc_threads"
+# define ERR_MALLOC_PHILOS    "error malloc_philos"
+# define ERR_MALLOC_THRD_ARGS "error malloc_thrd_args"
+# define ERR_CREAT_THREAD     "error creat_thread"
+# define ERR_JOIN_THREAD      "error join_thread"
+# define ERR_GET_TIME         "error get_time"
+
+typedef struct timeval	t_timeval;
+
 typedef struct s_args
 {
-	int	philo_num;
-	int	ttd;
-	int	tte;
-	int	tts;
-	int	min_eats;
+	int		philo_num;
+	int		ttd;
+	int		tte;
+	int		tts;
+	int		min_eats;
+	int		err;
 }	t_args;
 
 typedef struct s_philo
 {
-	pthread_mutex_t	m_fork;
-	pthread_mutex_t	m_philo;
-	suseconds_t		last_meal;
+	pthread_mutex_t	*m_fork;
+	pthread_mutex_t	*m_philo;
+	t_timeval	last_meal;
 	int				meals;
-} t_philo;
+}	t_philo;
 
+typedef struct s_data
+{
+	t_args	args;
+	t_philo	*philos;
+	pthread_mutex_t	*m_print;
+	int		print;
+	int		philo_num;
+	int		end;
+	int		err;
+}	t_data;
 
-t_args			get_args(void);
-void			parse(int ac, char **av);
-int				error(void);
+typedef struct s_thread_arg
+{
+	int		i;
+	t_data	*data;
+}	t_thread_arg;
+
+//parsing
+t_args			parse(int ac, char **av);
+
+//error
+int				error(char *str, t_data *data);
+
+//time
+t_timeval	get_timeval(t_data *data);
+long			time_difference(t_timeval tv1, t_timeval tv2);
+t_timeval	print_time(t_timeval tv);
+
+//data
+t_data			init_data(t_args args);
+void			destroy_data(t_data *data);
+t_thread_arg	*create_thread_args(t_data	*data);
+void			detach_philos(t_data *data, pthread_t *philosophers);
+void	unlock_if_locked(pthread_mutex_t *mutex);
 
 //actions
-void			eating(long i);
-void			sleeping(long i);
-void			thinking(long i);
+void			eating(int i, t_data *data);
+void			sleeping(int i, t_data *data);
+void			thinking(int i, t_data *data);
+void			print_action(t_data *data, char *str, int i);
 
-suseconds_t get_u_timeofday();
-
-suseconds_t	get_last_meal(long i);
-void			set_last_meal(long i, struct timeval tv);
-void			kill_philos(void);
-t_philo			*get_philos();
 
 
 #endif
