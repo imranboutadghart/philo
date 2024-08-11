@@ -31,8 +31,6 @@
 
 typedef struct timeval	t_timeval;
 
-# include <semaphore.h>
-
 typedef struct s_philo
 {
 	pthread_mutex_t	m_fork;
@@ -46,6 +44,7 @@ typedef struct s_data
 	t_philo			*philos;
 	pthread_mutex_t	m_err;
 	int				err;
+	char			*err_message;
 	int				end;
 	int				philo_num;
 	int				ttd;
