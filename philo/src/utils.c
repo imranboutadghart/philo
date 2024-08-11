@@ -12,10 +12,8 @@
 
 #include "philo.h"
 
-int	error(char *str, t_data *data)
+int	error(char *str)
 {
-	if (data)
-		pthread_mutex_lock(data->m_print);
 	if (str)
 	{
 		printf("%s\n", str);
@@ -32,13 +30,13 @@ void	print_action(t_data *data, char *str, int i)
 	tv = get_timeval(data);
 	if (data->err)
 		return ;
-	pthread_mutex_lock(data->m_print);
+	pthread_mutex_lock(&data->m_err);
 	if (!(data->end || data->err) && PRINT)
 	{
 		print_time(tv);
 		printf(str, i + 1);
 	}	
-	pthread_mutex_unlock(data->m_print);
+	pthread_mutex_unlock(&data->m_err);
 }
 
 void	unlock_if_locked(pthread_mutex_t *mutex)

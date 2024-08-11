@@ -5,7 +5,11 @@ t_timeval	get_timeval(t_data *data)
 	t_timeval	tv;
 
 	if (gettimeofday(&tv, NULL))
-		data->err = error(ERR_GET_TIME, data);
+	{
+		pthread_mutex_lock(&data->m_err);
+		data->err = error(ERR_GET_TIME);
+		pthread_mutex_unlock(&data->m_err);
+	}
 	return (tv);
 }
 

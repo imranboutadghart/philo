@@ -1,6 +1,6 @@
 #include "philo.h"
 
-void	*monitoring(void *dt)
+static void	*monitoring(void *dt)
 {
 	int			looping;
 	int			i;
@@ -11,34 +11,32 @@ void	*monitoring(void *dt)
 	looping = 1;
 	while (looping)
 	{
+		looping = (data->min_eats == -1);
 		i = -1;
-		looping = 0;
-		while (++i < data->args.philo_num)
+		while (++i < data->philo_num)
 		{
-			pthread_mutex_lock(data->philos[i].m_philo);
+			pthread_mutex_lock(&data->philos[i].m_philo);
 			tv = get_timeval(data);
-			if (data->err)
-				return (pthread_mutex_unlock(data->philos[i].m_philo), NULL);
-			if (time_difference(tv, data->philos[i].last_meal) > data->args.ttd)
+			if (time_difference(tv, data->philos[i].last_meal) > data->ttd)
 			{
-				pthread_mutex_lock(data->m_print);
+				pthread_mutex_lock(&data->m_err);
 				print_time(tv);
-				printf(MAG"%d died"WHT"\n", i + 1);
-				printf(RED"diff = %ld\n", time_difference(tv, data->philos[i].last_meal));
+				printf(RED"%d died"WHT"\n", i + 1);
 				data->end = 1;
-				pthread_mutex_unlock(data->philos[i].m_philo);
+				pthread_mutex_unlock(&data->m_err);
+				pthread_mutex_unlock(&data->philos[i].m_philo);
 				return (NULL);
 			}
-			if (data->philos[i].meals < data->args.min_eats)
+			if (!looping && data->philos[i].meals < data->min_eats)
 				looping = 1;
-			pthread_mutex_unlock(data->philos[i].m_philo);
+			pthread_mutex_unlock(&data->philos[i].m_philo);
 		}
 	}
 	data->end = 1;
 	return (NULL);
 }
 
-void	*routine(void *thread_args)
+static void	*routine(void *thread_args)
 {
 	int		i;
 	t_data	*data;
@@ -46,82 +44,95 @@ void	*routine(void *thread_args)
 	i = ((t_thread_arg *)thread_args)->i;
 	data = ((t_thread_arg *)thread_args)->data;
 	if (i % 2)
-		usleep(data->args.tte * 1000);
+		usleep(data->tte * 500);
 	while (1)
 	{
 		eating(i, data);
 		sleeping(i, data);
 		thinking(i, data);
+		pthread_mutex_lock(&data->m_err);
 		if (data->err || data->end)
-			return (NULL);
+			return (pthread_mutex_unlock(&data->m_err), NULL);
+		pthread_mutex_unlock(&data->m_err);
 	}
 	return (NULL);
 }
 
 void	start_simulation(t_data *data)
 {
-	pthread_t		*philosophers;
-	pthread_t		monitor;
+	pthread_t		*threads;
+	pthread_t		monitor_thread;
 	t_thread_arg	*th_args;
 	int				i;
 
-	philosophers = malloc(data->args.philo_num * sizeof(pthread_t));
-	if (!philosophers)
+	threads = malloc(data->philo_num * sizeof(pthread_t));
+	if (!threads)
 	{
-		data->err= error(ERR_MALLOC_THREADS, NULL);
+		data->err= error(ERR_MALLOC_THREADS);
 		return ;
 	}
 	th_args = create_thread_args(data);
 	if (data->err)
 	{
-		free(philosophers);
+		free(threads);
 		return ;
 	}
 	i = 0;
-	while (i < data->args.philo_num)
+	while (i < data->philo_num)
 	{
-		if (pthread_create(philosophers + i, NULL, routine, (void*)(th_args + i)))
-			{
-				data->err = error(ERR_CREAT_THREAD, data);
-				break ;
-			}
+		if (pthread_create(threads + i, NULL, routine, (void*)(th_args + i)))
+		{
+			pthread_mutex_lock(&data->m_err);
+			data->err = error(ERR_CREAT_THREAD);
+			pthread_mutex_unlock(&data->m_err);
+			break ;
+		}
 		i++;
 	}
+	pthread_mutex_lock(&data->m_err);
 	if (!data->err)
 	{
-		pthread_create(&monitor, NULL, monitoring, (void *)data);
-		pthread_join(monitor, NULL);
-		i = data->args.philo_num - 1;
-		// if (data->err || data->end)
-		// {
-		// 	detach_philos(data, philosophers);
-		// 	unlock_if_locked(data->m_print);
-		// 	i = -1;
-		// }
+		pthread_mutex_unlock(&data->m_err);
+		pthread_create(&monitor_thread, NULL, monitoring, (void *)data);
+		pthread_join(monitor_thread, NULL);
+		i = data->philo_num - 1;
+		//if (data->err || data->end)
+		//{
+		//	detach_philos(data, threads);
+		//	unlock_if_locked(data->m_print);
+		//	i = -1;
+		//}
 	}
+	else
+		pthread_mutex_unlock(&data->m_err);
 	while (i >= 0)
 	{
-		if (pthread_join(philosophers[i], NULL))
-			data->err = error(ERR_JOIN_THREAD, data);
+		if (pthread_join(threads[i], NULL))
+			data->err = error(ERR_JOIN_THREAD);
 		i--;
 	}
 	free(th_args);
-	free(philosophers);
+	free(threads);
 }
 
 int main(int ac, char **av)
 {
-	t_args	args;
 	t_data	data;
 
-	args.err = 0;
-	args = parse(ac, av);
-	if (args.err)
-		return (1);
-	data.err = 0;
-	data = init_data(args);
+	init_data(&data, ac, av);
 	if (data.err)
 		return (1);
+	if (data.philo_num == 1)
+	{
+		pthread_mutex_lock(&data.philos[0].m_fork);
+		print_action(&data, YEL"%ld has taken a fork"WHT"\n", 0);
+		usleep(data.ttd * 1000);
+		print_time(get_timeval(&data));
+		printf(RED"%d died"WHT"\n", 1);
+		pthread_mutex_unlock(&data.philos[0].m_fork);
+		destroy_data(&data);
+		return (data.err);
+	}
 	start_simulation(&data);
 	destroy_data(&data);
 	return (data.err);

@@ -16,7 +16,7 @@
 # define CYN "\e[0;36m"
 # define WHT "\e[0;37m"
 
-# define PRINT 0
+# define PRINT 1
 
 # define ERR_EMPTY_ARG        "error empty_arg"
 # define ERR_TOO_BIG_ARG      "error too_big_arg"
@@ -31,33 +31,27 @@
 
 typedef struct timeval	t_timeval;
 
-typedef struct s_args
-{
-	int		philo_num;
-	int		ttd;
-	int		tte;
-	int		tts;
-	int		min_eats;
-	int		err;
-}	t_args;
+# include <semaphore.h>
 
 typedef struct s_philo
 {
-	pthread_mutex_t	*m_fork;
-	pthread_mutex_t	*m_philo;
+	pthread_mutex_t	m_fork;
+	pthread_mutex_t	m_philo;
 	t_timeval	last_meal;
 	int				meals;
 }	t_philo;
 
 typedef struct s_data
 {
-	t_args	args;
-	t_philo	*philos;
-	pthread_mutex_t	*m_print;
-	int		print;
-	int		philo_num;
-	int		end;
-	int		err;
+	t_philo			*philos;
+	pthread_mutex_t	m_err;
+	int				err;
+	int				end;
+	int				philo_num;
+	int				ttd;
+	int				tte;
+	int				tts;
+	int				min_eats;
 }	t_data;
 
 typedef struct s_thread_arg
@@ -67,10 +61,10 @@ typedef struct s_thread_arg
 }	t_thread_arg;
 
 //parsing
-t_args			parse(int ac, char **av);
+void			parse(t_data *data, int ac, char **av);
 
 //error
-int				error(char *str, t_data *data);
+int				error(char *str);
 
 //time
 t_timeval	get_timeval(t_data *data);
@@ -78,7 +72,7 @@ long			time_difference(t_timeval tv1, t_timeval tv2);
 t_timeval	print_time(t_timeval tv);
 
 //data
-t_data			init_data(t_args args);
+void			init_data(t_data *data, int ac, char **av);
 void			destroy_data(t_data *data);
 t_thread_arg	*create_thread_args(t_data	*data);
 void			detach_philos(t_data *data, pthread_t *philosophers);
