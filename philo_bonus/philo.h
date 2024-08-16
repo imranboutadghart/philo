@@ -31,13 +31,20 @@
 
 typedef struct timeval	t_timeval;
 
+typedef struct s_philo
+{
+	int	pid;
+}	t_philo;
+
 typedef struct s_data
 {
-	int				philo_num;
-	int				ttd;
-	int				tte;
-	int				tts;
-	int				min_eats;
+	int		philo_num;
+	int		ttd;
+	int		tte;
+	int		tts;
+	int		min_eats;
+	int		err;
+	t_philo	*philos;
 }	t_data;
 
 //parsing
