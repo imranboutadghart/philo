@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS= -Wall -Wextra -Werror -I.
+CFLAGS= -Wall -Wextra -Werror -I. -g
 NAME=philo
 SRCDIR=src
 BINDIR=bin

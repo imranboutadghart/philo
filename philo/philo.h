@@ -41,6 +41,8 @@
 # define ERR_JOIN_THREAD      "error join_thread"
 # define ERR_GET_TIME         "error get_time"
 
+# define MAX(x, y) (((x) >= (y)) * (x) + ((x) < (y)) * (y))
+
 typedef struct timeval	t_timeval;
 
 typedef struct s_philo

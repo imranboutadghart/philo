@@ -73,7 +73,7 @@ void	*routine(void *thread_args)
 		sleeping(i, data);
 		thinking(i, data);
 		if (i % 2 && data->philo_num % 2)
-			usleep(data->tte * 500);
+			usleep(MAX(data->tte * 2 - data->tts, 0) * 500);
 		pthread_mutex_lock(&data->m_err);
 		if (data->err || data->end)
 			return (pthread_mutex_unlock(&data->m_err), NULL);
