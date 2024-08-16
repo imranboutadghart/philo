@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/15 01:36:34 by iboutadg          #+#    #+#             */
+/*   Updated: 2024/08/15 01:36:36 by iboutadg         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 static int	ft_atoi(const char *str, int *err)
@@ -23,6 +35,7 @@ static int	ft_atoi(const char *str, int *err)
 void	parse(t_data *data, int ac, char **av)
 {
 	data->err = 0;
+	data->end = 0;
 	if (!(5 == ac || 6 == ac))
 	{
 		data->err = error(ERR_WRONG_NUM_ARG);

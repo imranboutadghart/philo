@@ -1,18 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   actions.c                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 01:41:18 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:41:22 by iboutadg         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "philo.h"
 
-static void	take_forks(int i, t_data *data)
+static void take_forks(int i, t_data *data)
 {
 	pthread_mutex_lock(&data->philos[i % data->philo_num].m_fork);
 	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
@@ -20,12 +8,19 @@ static void	take_forks(int i, t_data *data)
 	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
 }
 
-static void	take_forks_reversed(int i, t_data *data)
+static void take_forks_reversed(int i, t_data *data)
 {
+	//printf("data:%p, philos: %p, i: %d, philonum: %d, m_fork: %p\n", data, data->philos, i + 1, data->philo_num,data->philos[(i + 1) % data->philo_num].m_fork);
 	pthread_mutex_lock(&data->philos[(i + 1) % data->philo_num].m_fork);
 	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
 	pthread_mutex_lock(&data->philos[i % data->philo_num].m_fork);
 	print_action(data, YEL"%ld has taken a fork"WHT"\n", i);
+}
+
+void	put_forks(int i, t_data *data)
+{
+	pthread_mutex_unlock(&data->philos[i].m_fork);
+	pthread_mutex_unlock(&data->philos[(i + 1) %	 data->philo_num].m_fork);
 }
 
 void	eating(int i, t_data *data)
@@ -43,18 +38,15 @@ void	eating(int i, t_data *data)
 	data->philos[i].meals++;
 	pthread_mutex_unlock(&data->philos[i].m_philo);
 	usleep(data->tte * 1000);
-	pthread_mutex_unlock(&data->philos[i].m_fork);
-	pthread_mutex_unlock(&data->philos[(i + 1) % data->philo_num].m_fork);
+	put_forks(i, data);
 }
-
 void	sleeping(int i, t_data *data)
-
 {
 	print_action(data, GRN"%ld is sleeping"WHT"\n", i);
 	usleep(data->tts * 1000);
 }
-
 void	thinking(int i, t_data *data)
 {
 	print_action(data, BLU"%ld is thinking"WHT"\n", i);
 }
+

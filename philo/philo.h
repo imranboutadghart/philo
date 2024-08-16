@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/15 01:37:15 by iboutadg          #+#    #+#             */
+/*   Updated: 2024/08/15 01:37:18 by iboutadg         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -35,7 +47,7 @@ typedef struct s_philo
 {
 	pthread_mutex_t	m_fork;
 	pthread_mutex_t	m_philo;
-	t_timeval	last_meal;
+	t_timeval		last_meal;
 	int				meals;
 }	t_philo;
 
@@ -44,7 +56,6 @@ typedef struct s_data
 	t_philo			*philos;
 	pthread_mutex_t	m_err;
 	int				err;
-	char			*err_message;
 	int				end;
 	int				philo_num;
 	int				ttd;
@@ -66,16 +77,15 @@ void			parse(t_data *data, int ac, char **av);
 int				error(char *str);
 
 //time
-t_timeval	get_timeval(t_data *data);
+t_timeval		get_timeval(t_data *data);
 long			time_difference(t_timeval tv1, t_timeval tv2);
-t_timeval	print_time(t_timeval tv);
+t_timeval		print_time(t_timeval tv);
 
 //data
 void			init_data(t_data *data, int ac, char **av);
 void			destroy_data(t_data *data);
 t_thread_arg	*create_thread_args(t_data	*data);
-void			detach_philos(t_data *data, pthread_t *philosophers);
-void	unlock_if_locked(pthread_mutex_t *mutex);
+void			unlock_if_locked(pthread_mutex_t *mutex);
 
 //actions
 void			eating(int i, t_data *data);
@@ -83,6 +93,8 @@ void			sleeping(int i, t_data *data);
 void			thinking(int i, t_data *data);
 void			print_action(t_data *data, char *str, int i);
 
-
+//threads
+void			*routine(void *thread_args);
+void			*monitoring(void *dt);
 
 #endif

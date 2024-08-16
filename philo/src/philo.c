@@ -1,94 +1,57 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/15 01:36:40 by iboutadg          #+#    #+#             */
+/*   Updated: 2024/08/15 01:36:43 by iboutadg         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
-static void	*monitoring(void *dt)
+int	alloc_threads(t_data *data, pthread_t **threads, t_thread_arg **th_args)
 {
-	int			looping;
-	int			i;
-	t_timeval	tv;
-	t_data		*data;
+	*threads = malloc(data->philo_num * sizeof(pthread_t));
+	if (!*threads)
+		return (data->err = error(ERR_MALLOC_THREADS), data->err);
+	*th_args = create_thread_args(data);
+	if (data->err)
+		return (free(threads), data->err);
+	return (0);
+}
 
-	data = (t_data *)dt;
-	looping = 1;
-	while (looping)
+int	create_threads(t_data *data, pthread_t *threads, t_thread_arg *th_args)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->philo_num)
 	{
-		looping = (data->min_eats == -1);
-		i = -1;
-		while (++i < data->philo_num)
+		if (pthread_create(threads + i, NULL, routine, (void *)(th_args + i)))
 		{
-			pthread_mutex_lock(&data->philos[i].m_philo);
-			tv = get_timeval(data);
-			if (time_difference(tv, data->philos[i].last_meal) > data->ttd)
-			{
-				pthread_mutex_lock(&data->m_err);
-				print_time(tv);
-				printf(RED"%d died"WHT"\n", i + 1);
-				data->end = 1;
-				pthread_mutex_unlock(&data->m_err);
-				pthread_mutex_unlock(&data->philos[i].m_philo);
-				return (NULL);
-			}
-			if (!looping && data->philos[i].meals < data->min_eats)
-				looping = 1;
-			pthread_mutex_unlock(&data->philos[i].m_philo);
+			pthread_mutex_lock(&data->m_err);
+			data->err = error(ERR_CREAT_THREAD);
+			pthread_mutex_unlock(&data->m_err);
+			return (i);
 		}
+		i++;
 	}
-	data->end = 1;
-	return (NULL);
+	return (0);
 }
 
-static void	*routine(void *thread_args)
-{
-	int		i;
-	t_data	*data;
-
-	i = ((t_thread_arg *)thread_args)->i;
-	data = ((t_thread_arg *)thread_args)->data;
-	if (i % 2)
-		usleep(data->tte * 500);
-	while (1)
-	{
-		eating(i, data);
-		sleeping(i, data);
-		thinking(i, data);
-		pthread_mutex_lock(&data->m_err);
-		if (data->err || data->end)
-			return (pthread_mutex_unlock(&data->m_err), NULL);
-		pthread_mutex_unlock(&data->m_err);
-	}
-	return (NULL);
-}
-
-void	start_simulation(t_data *data)
+int	start_simulation(t_data *data)
 {
 	pthread_t		*threads;
 	pthread_t		monitor_thread;
 	t_thread_arg	*th_args;
 	int				i;
 
-	threads = malloc(data->philo_num * sizeof(pthread_t));
-	if (!threads)
-	{
-		data->err= error(ERR_MALLOC_THREADS);
-		return ;
-	}
-	th_args = create_thread_args(data);
-	if (data->err)
-	{
-		free(threads);
-		return ;
-	}
-	i = 0;
-	while (i < data->philo_num)
-	{
-		if (pthread_create(threads + i, NULL, routine, (void*)(th_args + i)))
-		{
-			pthread_mutex_lock(&data->m_err);
-			data->err = error(ERR_CREAT_THREAD);
-			pthread_mutex_unlock(&data->m_err);
-			break ;
-		}
-		i++;
-	}
+	if (alloc_threads(data, &threads, &th_args))
+		return (data->err);
+	i = create_threads(data, threads, th_args);
 	pthread_mutex_lock(&data->m_err);
 	if (!data->err)
 	{
@@ -96,26 +59,18 @@ void	start_simulation(t_data *data)
 		pthread_create(&monitor_thread, NULL, monitoring, (void *)data);
 		pthread_join(monitor_thread, NULL);
 		i = data->philo_num - 1;
-		//if (data->err || data->end)
-		//{
-		//	detach_philos(data, threads);
-		//	unlock_if_locked(data->m_print);
-		//	i = -1;
-		//}
 	}
 	else
 		pthread_mutex_unlock(&data->m_err);
 	while (i >= 0)
-	{
-		if (pthread_join(threads[i], NULL))
+		if (pthread_join(threads[i--], NULL))
 			data->err = error(ERR_JOIN_THREAD);
-		i--;
-	}
 	free(th_args);
 	free(threads);
+	return (0);
 }
 
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
 	t_data	data;
 

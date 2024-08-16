@@ -12,32 +12,27 @@
 
 #include "philo.h"
 
-int	error(void)
+int	error(char *str)
 {
+	if (str)
+	{
+		printf("%s\n", str);
+		return (1);
+	}
 	write(2, "Error\n", 6);
 	return (1);
 }
 
-size_t	ft_strlen(const char *s)
+void	print_action(t_data *data, char *str, int i)
 {
-	size_t	i;
+	t_timeval	tv;
 
-	i = 0;
-	while (s[i])
-		i++;
-	return (i);
-}
-
-int	in_str(char c, char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
+	tv = get_timeval(data);
+	if (data->err)
+		return ;
+	if (!(data->end || data->err) && PRINT)
 	{
-		if (str[i] == c)
-			return (1);
-		i++;
-	}
-	return (0);
+		print_time(tv);
+		printf(str, i + 1);
+	}	
 }

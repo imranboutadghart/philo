@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   data.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/15 01:36:29 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:36:30 by iboutadg         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <philo.h>
 
 void	init_philo(t_data *data, int i, t_timeval tv)
@@ -46,7 +34,7 @@ void	init_data(t_data *data, int ac, char **av)
 	return ;
 }
 
-void	destroy_data(t_data *data)
+void  destroy_data(t_data *data)
 {
 	int		i;
 
