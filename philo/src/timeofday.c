@@ -33,6 +33,6 @@ long	time_difference(t_timeval tv1, t_timeval tv2)
 
 t_timeval	print_time(t_timeval tv)
 {
-	printf("%ld.%03ld ", tv.tv_sec, tv.tv_usec / 1000);
+	printf("%ld%03ld ", tv.tv_sec, tv.tv_usec / 1000);
 	return (tv);
 }

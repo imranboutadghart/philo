@@ -44,3 +44,8 @@ void	unlock_if_locked(pthread_mutex_t *mutex)
 	pthread_mutex_trylock(mutex);
 	pthread_mutex_unlock(mutex);
 }
+
+int	max(int a, int b)
+{
+	return (a * (a > b) + b * (a <= b));
+}
