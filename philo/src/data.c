@@ -53,8 +53,6 @@ void	destroy_data(t_data *data)
 	i = 0;
 	while (i < data->philo_num)
 	{
-		unlock_if_locked(&data->philos[i].m_philo);
-		unlock_if_locked(&data->philos[i].m_fork);
 		pthread_mutex_destroy(&data->philos[i].m_fork);
 		pthread_mutex_destroy(&data->philos[i].m_philo);
 		i++;

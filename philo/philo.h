@@ -85,7 +85,6 @@ t_timeval		print_time(t_timeval tv);
 void			init_data(t_data *data, int ac, char **av);
 void			destroy_data(t_data *data);
 t_thread_arg	*create_thread_args(t_data	*data);
-void			unlock_if_locked(pthread_mutex_t *mutex);
 
 //actions
 void			eating(int i, t_data *data);
