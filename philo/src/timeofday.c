@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   timeofday.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:51 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:36:55 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/09/20 02:12:03 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,29 @@ t_timeval	print_time(t_timeval tv)
 {
 	printf("%ld%03ld ", tv.tv_sec, tv.tv_usec / 1000);
 	return (tv);
+}
+
+int	my_usleep(int time, t_data *data)
+{
+	t_timeval	start;
+	t_timeval	end;
+	long		diff;
+
+	start = get_timeval(data);
+	end = start;
+	diff = 0;
+	while (diff < time / 1000)
+	{
+		pthread_mutex_lock(&data->m_err);
+		if (data->end || data->err)
+		{
+			pthread_mutex_unlock(&data->m_err);
+			return (1);
+		}
+		pthread_mutex_unlock(&data->m_err);
+		usleep(100);
+		end = get_timeval(data);
+		diff = time_difference(end, start);
+	}
+	return (0);
 }

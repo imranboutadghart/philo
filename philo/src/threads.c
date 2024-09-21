@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:46 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:36:48 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/09/20 01:18:09 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ void	*monitoring(void *dt)
 	looping = 1;
 	while (looping)
 	{
+		usleep(10);
 		looping = (data->min_eats == -1);
 		i = -1;
 		while (++i < data->philo_num)
@@ -64,17 +65,17 @@ void	*routine(void *thread_args)
 	i = ((t_thread_arg *)thread_args)->i;
 	data = ((t_thread_arg *)thread_args)->data;
 	if (data->philo_num % 2 && i == data->philo_num - 1)
-		usleep(data->tte * 1500);
+		my_usleep(data->tte * 1500, data);
 	if (i % 2)
-		usleep(data->tte * 500);
+		my_usleep(data->tte * 500, data);
 	while (1)
 	{
 		eating(i, data);
 		sleeping(i, data);
 		thinking(i, data);
 		if (data->philo_num % 2)
-			usleep(max(data->tte * 2 - data->tts, 0) * \
-				(500 * (i % 2) + 200 * (i == data->philo_num - 1)));
+			my_usleep(max(data->tte * 2 - data->tts, 0) * \
+				(500 * (i % 2) + 200 * (i == data->philo_num - 1)), data);
 		pthread_mutex_lock(&data->m_err);
 		if (data->err || data->end)
 			return (pthread_mutex_unlock(&data->m_err), NULL);

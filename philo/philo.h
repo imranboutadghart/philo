@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:37:15 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:37:18 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/09/21 21:44:13 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ int				error(char *str);
 t_timeval		get_timeval(t_data *data);
 long			time_difference(t_timeval tv1, t_timeval tv2);
 t_timeval		print_time(t_timeval tv);
+int				my_usleep(int time, t_data *data);
 
 //data
 void			init_data(t_data *data, int ac, char **av);

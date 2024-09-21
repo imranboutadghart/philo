@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   actions.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:41:18 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:41:22 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/09/20 01:18:24 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	eating(int i, t_data *data)
 	data->philos[i].last_meal = tv;
 	data->philos[i].meals++;
 	pthread_mutex_unlock(&data->philos[i].m_philo);
-	usleep(data->tte * 1000);
+	my_usleep(data->tte * 1000, data);
 	pthread_mutex_unlock(&data->philos[i].m_fork);
 	pthread_mutex_unlock(&data->philos[(i + 1) % data->philo_num].m_fork);
 }
@@ -51,7 +51,7 @@ void	sleeping(int i, t_data *data)
 
 {
 	print_action(data, GRN"%ld is sleeping"WHT"\n", i);
-	usleep(data->tts * 1000);
+	my_usleep(data->tts * 1000, data);
 }
 
 void	thinking(int i, t_data *data)
