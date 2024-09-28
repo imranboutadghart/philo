@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iboutadg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:34 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/08/15 01:36:36 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/09/28 22:21:18 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,5 +55,7 @@ void	parse(t_data *data, int ac, char **av)
 		data->min_eats = ft_atoi(av[5], &data->err);
 	else
 		data->min_eats = -1;
+	if (!data->min_eats)
+		exit(0);
 	return ;
 }
