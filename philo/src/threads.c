@@ -6,7 +6,7 @@
 /*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:46 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/09/20 01:18:09 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/10/01 06:00:20 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,10 @@ void	*monitoring(void *dt)
 			pthread_mutex_unlock(&data->philos[i].m_philo);
 		}
 	}
+	pthread_mutex_lock(&data->m_err);
 	data->end = 1;
+	pthread_mutex_unlock(&data->m_err);
+	
 	return (NULL);
 }
 
