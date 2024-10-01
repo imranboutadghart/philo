@@ -6,7 +6,7 @@
 /*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:34 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/09/28 22:21:18 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/10/01 05:54:30 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void	parse(t_data *data, int ac, char **av)
 		data->min_eats = ft_atoi(av[5], &data->err);
 	else
 		data->min_eats = -1;
-	if (!data->min_eats)
+	if (!data->min_eats || !data->philo_num)
 		exit(0);
 	return ;
 }
