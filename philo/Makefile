@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS= -Wall -Wextra -Werror -I. #-fsanitize=thread
+CFLAGS= -Wall -Wextra -Werror -I. -fsanitize=thread
 NAME=philo
 SRCDIR=src
 BINDIR=bin

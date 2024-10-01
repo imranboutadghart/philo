@@ -6,7 +6,7 @@
 /*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:34 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/10/01 05:54:30 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/10/01 06:17:45 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static int	ft_atoi(const char *str, int *err)
 	{
 		res = res * 10 + str[i++] - '0';
 		if ((res > 2147483647))
-			*err = error(ERR_TOO_BIG_ARG);
+			return (*err = error(ERR_TOO_BIG_ARG), 2147483647);
 	}
 	if (str[i])
 		*err = error(ERR_INVALID_INPUT);
