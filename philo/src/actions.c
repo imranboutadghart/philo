@@ -6,7 +6,7 @@
 /*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:41:18 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/09/20 01:18:24 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/12/21 20:12:37 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,14 @@ void	eating(int i, t_data *data)
 {
 	t_timeval	tv;
 
+  // Take forks left then right if i is odd
+  // for the off chance of a deadlock
 	if (i % 2)
 		take_forks(i, data);
 	else
 		take_forks_reversed(i, data);
 	pthread_mutex_lock(&data->philos[i].m_philo);
+  // Getting time_val after mutex lock
 	tv = get_timeval(data);
 	print_action(data, MAG"%ld is eating"WHT"\n", i);
 	data->philos[i].last_meal = tv;

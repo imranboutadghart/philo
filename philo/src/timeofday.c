@@ -6,7 +6,7 @@
 /*   By: iboutadg <iboutadg@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/15 01:36:51 by iboutadg          #+#    #+#             */
-/*   Updated: 2024/09/28 22:17:49 by iboutadg         ###   ########.fr       */
+/*   Updated: 2024/12/21 20:10:07 by iboutadg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ t_timeval	print_time(t_timeval tv)
 	return (tv);
 }
 
+// Function to sleep instead of usleep to not hang there
 int	my_usleep(int time, t_data *data)
 {
 	t_timeval	start;
